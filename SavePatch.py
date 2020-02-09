@@ -53,7 +53,13 @@ def main():
     output_path = str(askFile("Select output file name","Save changes"))
 
     if not os.path.isfile(output_path):
-        shutil.copy(orig_path,output_path)
+        # Ghidra always returns the path to the executable with a leading slash, even on Windows, where it's technically an invalid path.
+        # In Python 2, shutil.copy() will throw an exception if you use this path, but it will still copy the file, so just ignore the exception
+        # and continue on to patch the copied binary.
+        try:
+            shutil.copy(orig_path,output_path)
+        except OSError:
+            pass
 
     with open(output_path,"rb+") as f:
         monitor.setMessage("Patching copied file")
